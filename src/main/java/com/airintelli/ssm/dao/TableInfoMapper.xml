@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.airintelli.ssm.dao.TableInfoMapper" >
+  <resultMap id="BaseResultMap" type="com.airintelli.ssm.pojo.TableInfo" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="updateTime" property="updatetime" jdbcType="DATE" />
+    <result column="physicalTableName" property="physicaltablename" jdbcType="VARCHAR" />
+    <result column="cid" property="cid" jdbcType="INTEGER" />
+    <result column="state" property="state" jdbcType="INTEGER" />
+    <result column="showtype" property="showtype" jdbcType="VARCHAR" />
+    
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, name, updateTime, physicalTableName, cid ,state, showtype
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from tableinfo
+    where id = #{id,jdbcType=INTEGER} 
+  </select>
+<!--   通过用户ID查询表信息显示启用的表 -->
+  <select id="selectByCid"  parameterType="java.lang.Integer"  resultMap="BaseResultMap"  >
+  select
+  <include refid="Base_Column_List" />
+    from tableinfo
+    where cid = #{cid,jdbcType=INTEGER} and state=1
+  </select>
+  <!--   通过用户ID查询表信息 -->
+  <select id="selectByCids"  parameterType="java.lang.Integer"  resultMap="BaseResultMap"  >
+  select
+  <include refid="Base_Column_List" />
+    from tableinfo
+    where cid = #{cid,jdbcType=INTEGER} 
+  </select>
+  <!-- 分页查询 -->
+ <select id="getPage"  parameterType="com.airintelli.ssm.pojo.PageBean"  resultType="com.airintelli.ssm.pojo.TableInfo"  >
+  
+  select 
+  <include refid="Base_Column_List" />
+  from tableinfo  
+  <where>
+  <!-- 第一个查询条件用户编号 -->
+  <if  test="querycondition.firstcondition !=null and  querycondition.firstcondition!=''">
+    and    cid=#{querycondition.firstcondition}
+  </if>
+  <!-- 第二个查询条件状态 -->
+  <if  test="querycondition.secondcondition !=null and  querycondition.secondcondition!=''">
+   and    state=#{querycondition.secondcondition}
+  </if>
+  <!-- 第三个查询条件表名 -->
+  <if  test="querycondition.thirdcondition !=null and  querycondition.thirdcondition!=''">
+   and    name=#{querycondition.thirdcondition}
+  </if>
+  </where>
+  
+  limit #{pageRowes},#{pageSize}
+  </select>
+  <!-- 获得总记录数 -->
+   <select id="pageCount"  parameterType="com.airintelli.ssm.pojo.PageBean"    resultType="java.lang.Integer" >
+  select count(*)from tableinfo 
+  <where>
+ <!-- 第一个查询条件用户编号-->
+  <if  test="querycondition.firstcondition !=null and  querycondition.firstcondition!=''">
+    and    cid=#{querycondition.firstcondition}
+  </if>
+  <!-- 第二个查询条件状态 -->
+  <if  test="querycondition.secondcondition !=null and  querycondition.secondcondition!=''">
+   and    state=#{querycondition.secondcondition}
+  </if>
+  <!-- 第三个查询条件表名 -->
+  <if  test="querycondition.thirdcondition !=null and  querycondition.thirdcondition!=''">
+   and    name=#{querycondition.thirdcondition}
+  </if>
+  </where>
+  </select>
+<!--   通过物理表名查询变信息编号 -->
+  <select id="selectByTableName"  parameterType="java.lang.String" resultType="java.lang.Integer"  >
+  select
+  id
+    from tableinfo
+    where physicalTableName = #{physicaltablename,jdbcType=VARCHAR}
+  </select>
+ <!--   通过用户编号和表名查询(用于唯一表名验证) -->
+  <select id="selectByTNameandCid"  parameterType="com.airintelli.ssm.pojo.TableInfo" resultMap="BaseResultMap"  >
+  select
+   <include refid="Base_Column_List" />
+    from tableinfo
+    where cid = #{cid,jdbcType=INTEGER} and  name = #{name,jdbcType=VARCHAR}
+  </select>
+  
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from tableinfo
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.airintelli.ssm.pojo.TableInfo" >
+    insert into tableinfo (id, name, updateTime, 
+      physicalTableName, cid)
+    values (#{id,jdbcType=INTEGER}, #{name,jdbcType=VARCHAR}, #{updatetime,jdbcType=DATE}, 
+      #{physicaltablename,jdbcType=VARCHAR}, #{cid,jdbcType=INTEGER}, #{showtype,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.airintelli.ssm.pojo.TableInfo" >
+    insert into tableinfo
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="name != null" >
+        name,
+      </if>
+      <if test="updatetime != null" >
+        updateTime,
+      </if>
+      <if test="physicaltablename != null" >
+        physicalTableName,
+      </if>
+      <if test="cid != null" >
+        cid,
+      </if>
+       <if test="state != null" >
+        state,
+      </if>
+      <if test="showtype != null" >
+        showtype,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="name != null" >
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="updatetime != null" >
+        #{updatetime,jdbcType=DATE},
+      </if>
+      <if test="physicaltablename != null" >
+        #{physicaltablename,jdbcType=VARCHAR},
+      </if>
+      <if test="cid != null" >
+        #{cid,jdbcType=INTEGER},
+      </if>
+      <if test="state != null" >
+        #{state,jdbcType=INTEGER},
+      </if>
+      <if test="showtype != null" >
+        #{showtype,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.airintelli.ssm.pojo.TableInfo" >
+    update tableinfo
+    <set >
+      <if test="name != null" >
+        name = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="updatetime != null" >
+        updateTime = #{updatetime,jdbcType=DATE},
+      </if>
+      <if test="physicaltablename != null" >
+        physicalTableName = #{physicaltablename,jdbcType=VARCHAR},
+      </if>
+      <if test="cid != null" >
+        cid = #{cid,jdbcType=INTEGER},
+      </if>
+      <if test="state != null" >
+        state = #{state,jdbcType=INTEGER},
+      </if>
+      <if test="showtype != null" >
+        showtype = #{showtype,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.airintelli.ssm.pojo.TableInfo" >
+    update tableinfo
+    set name = #{name,jdbcType=VARCHAR},
+      updateTime = #{updatetime,jdbcType=DATE},
+      physicalTableName = #{physicaltablename,jdbcType=VARCHAR},
+      cid = #{cid,jdbcType=INTEGER},
+      state = #{state,jdbcType=INTEGER},
+      showtype = #{showtype,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

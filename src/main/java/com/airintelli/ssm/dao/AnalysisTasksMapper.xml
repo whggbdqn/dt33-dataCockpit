@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.airintelli.ssm.dao.AnalysisTasksMapper" >
+ <resultMap id="BaseResultMap" type="com.airintelli.ssm.pojo.AnalysisTasks" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="starttime" property="startTime" jdbcType="TIMESTAMP" />
+    <result column="endtime" property="endTime" jdbcType="DATE" />
+    <result column="cid" property="cid" jdbcType="INTEGER" />
+    <result column="did" property="did" jdbcType="INTEGER" />
+    <result column="taskstatus" property="taskStatus" jdbcType="INTEGER" />
+    <result column="rule" property="rule" jdbcType="VARCHAR" />
+    <result column="feedback" property="feedBack" jdbcType="VARCHAR" />
+    <result column="arithmeticid" property="arithmeticid" jdbcType="INTEGER" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, starttime, endtime, cid, did, taskstatus, rule, feedback, arithmeticid
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from analysistasks
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+<!--   通过用户编号查询分析任务 -->
+<select id="selectByCid" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from analysistasks
+    where cid = #{cid,jdbcType=INTEGER}
+  </select>
+<!-- 通过数据关系编号查询分析任务 -->
+<select id="selectByDid" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from analysistasks
+    where did = #{did,jdbcType=INTEGER}
+  </select>
+<!-- 分页查询 -->
+ <select id="getPage"  parameterType="com.airintelli.ssm.pojo.PageBean"  resultType="com.airintelli.ssm.pojo.AnalysisTasks"  >
+  
+  select 
+  <include refid="Base_Column_List" />
+  from analysistasks  
+  <where>
+  <!--   第一个条件企业编号 -->
+  <if  test="querycondition.firstcondition !=null and  querycondition.firstcondition!=''">
+    and    cid=#{querycondition.firstcondition}
+  </if>
+  <!-- 第二个条件 任务状态 -->
+  <if  test="querycondition.secondcondition !=null and  querycondition.secondcondition!=''">
+   and    did=#{querycondition.secondcondition}
+  </if>
+  <!--   第三个条件算法编号 -->
+  <if  test="querycondition.thirdcondition !=null and  querycondition.thirdcondition!=''">
+   and    arithmeticid=#{querycondition.thirdcondition}
+  </if>
+  </where>
+  
+  limit #{pageRowes},#{pageSize}
+  </select>
+  <!-- 获得总记录数 -->
+   <select id="getCount"  parameterType="com.airintelli.ssm.pojo.PageBean"    resultType="java.lang.Integer" >
+  select count(*)from analysistasks 
+  <where>
+<!--   第一个条件企业编号 -->
+  <if  test="querycondition.firstcondition !=null and  querycondition.firstcondition!=''">
+    and    cid=#{querycondition.firstcondition}
+  </if>
+<!-- 第二个条件 任务状态 -->
+  <if  test="querycondition.secondcondition !=null and  querycondition.secondcondition!=''">
+   and    did=#{querycondition.secondcondition}
+  </if>
+<!--   第三个条件算法编号 -->
+  <if  test="querycondition.thirdcondition !=null and  querycondition.thirdcondition!=''">
+   and    arithmeticid=#{querycondition.thirdcondition}
+  </if>
+  </where>
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from analysistasks
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+ 
+  <insert id="insert" parameterType="com.airintelli.ssm.pojo.AnalysisTasks" >
+    insert into analysistasks (id, starttime, endtime, 
+      cid, did, taskstatus, 
+      rule, feedback, arithmeticid
+      )
+    values (#{id,jdbcType=INTEGER}, #{startTime,jdbcType=TIMESTAMP}, #{endTime,jdbcType=DATE}, 
+      #{cid,jdbcType=INTEGER}, #{did,jdbcType=INTEGER}, #{taskStatus,jdbcType=INTEGER}, 
+      #{rule,jdbcType=VARCHAR}, #{feedBack,jdbcType=VARCHAR}, #{arithmeticid,jdbcType=INTEGER}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.airintelli.ssm.pojo.AnalysisTasks" >
+    insert into analysistasks
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="startTime != null" >
+        starttime,
+      </if>
+      <if test="endTime != null" >
+        endtime,
+      </if>
+      <if test="cid != null" >
+        cid,
+      </if>
+      <if test="did != null" >
+        did,
+      </if>
+      <if test="taskStatus != null" >
+        taskstatus,
+      </if>
+      <if test="rule != null" >
+        rule,
+      </if>
+      <if test="feedBack != null" >
+        feedback,
+      </if>
+      <if test="arithmeticid != null" >
+        arithmeticid,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="startTime != null" >
+        #{startTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="endTime != null" >
+        #{endTime,jdbcType=DATE},
+      </if>
+      <if test="cid != null" >
+        #{cid,jdbcType=INTEGER},
+      </if>
+      <if test="did != null" >
+        #{did,jdbcType=INTEGER},
+      </if>
+      <if test="taskStatus != null" >
+        #{taskStatus,jdbcType=INTEGER},
+      </if>
+      <if test="rule != null" >
+        #{rule,jdbcType=VARCHAR},
+      </if>
+      <if test="feedBack != null" >
+        #{feedBack,jdbcType=VARCHAR},
+      </if>
+      <if test="arithmeticid != null" >
+        #{arithmeticid,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.airintelli.ssm.pojo.AnalysisTasks" >
+    update analysistasks
+    <set >
+      <if test="startTime != null" >
+        starttime = #{startTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="endTime != null" >
+        endtime = #{endTime,jdbcType=DATE},
+      </if>
+      <if test="cid != null" >
+        cid = #{cid,jdbcType=INTEGER},
+      </if>
+      <if test="did != null" >
+        did = #{did,jdbcType=INTEGER},
+      </if>
+      <if test="taskStatus != null" >
+        taskstatus = #{taskStatus,jdbcType=INTEGER},
+      </if>
+      <if test="rule != null" >
+        rule = #{rule,jdbcType=VARCHAR},
+      </if>
+      <if test="feedBack != null" >
+        feedback = #{feedBack,jdbcType=VARCHAR},
+      </if>
+      <if test="arithmeticid != null" >
+        arithmeticid = #{arithmeticid,jdbcType=INTEGER},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.airintelli.ssm.pojo.AnalysisTasks" >
+    update analysistasks
+    set starttime = #{startTime,jdbcType=TIMESTAMP},
+      endtime = #{endTime,jdbcType=DATE},
+      cid = #{cid,jdbcType=INTEGER},
+      did = #{did,jdbcType=INTEGER},
+      taskstatus = #{taskStatus,jdbcType=INTEGER},
+      rule = #{rule,jdbcType=VARCHAR},
+      feedback = #{feedBack,jdbcType=VARCHAR},
+      arithmeticid = #{arithmeticid,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+
+</mapper>

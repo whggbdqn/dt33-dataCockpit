@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+       					   http://www.springframework.org/schema/beans/spring-beans-4.1.xsd
+       					   http://www.springframework.org/schema/tx 
+       					   http://www.springframework.org/schema/tx/spring-tx-4.1.xsd
+       					   http://www.springframework.org/schema/aop 
+       					   http://www.springframework.org/schema/aop/spring-aop-4.1.xsd
+       					   http://www.springframework.org/schema/context 
+       					   http://www.springframework.org/schema/context/spring-context-4.1.xsd">
+
+	<context:property-placeholder location="classpath:jdbc.properties" />
+	<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource">
+		<property name="driverClassName" value="${driverClass}"></property>
+		<property name="url" value="${jdbcUrl}"></property>
+		<property name="username" value="${user}"></property>
+		<property name="password" value="${password}"></property>
+	</bean>
+
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource">
+			<ref bean="dataSource" />
+		</property>
+		<property name="configLocation" value="classpath:mybatisConfig.xml" />
+	</bean>
+	<bean id="tempTableDao" class="com.airintelli.ssm.dao.TempTableDao">
+		  <property name="dataSource" ref="dataSource"></property>
+	</bean>
+	
+	<bean id="mapperScannerConfigurer" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="com.airintelli.ssm.dao"></property>
+		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"></property>
+	</bean>
+	<bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	<tx:annotation-driven transaction-manager="transactionManager" />
+	<context:component-scan base-package="com.airintelli.ssm" />
+
+	<!-- shiro配置文件 -->
+	<!-- Shiro 的Web过滤器 -->
+	<bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+		<property name="securityManager" ref="securityManager" />
+		<!-- loginUrl认证提交地址，如果没有认证将会请求此地址进行认证，请求此地址将由formAuthenticationFilter进行表单认证 -->
+		<property name="loginUrl" value="/login/loginHandler.action" />
+		<property name="unauthorizedUrl" value="/refuse.jsp" />
+		<property name="filters">
+			<map>
+				<!-- FormAuthenticationFilter是基于表单认证的过虑器 -->
+				<entry key="authc" value-ref="formAuthenticationFilter" />
+			</map>
+		</property>
+		<!-- 过虑器链定义，从上向下顺序执行，一般将/**放在最下边 -->
+		<property name="filterChainDefinitions">
+			<value>
+				<!-- 退出拦截，请求logout.action执行退出操作 -->
+				/logout.action = logout
+				<!-- anon匿名访问 -->
+				<!-- /login.jsp = anon /index.jsp = anon -->
+
+				<!-- /jsp/manager/managerLogin.jsp = anon /jsp/login/customerLogin.jsp 
+					= anon -->
+				<!-- 对静态资源设置匿名访问 -->
+				/bootstrap/** =anon
+				/dist/** = anon
+				/plugins/** = anon
+				/validatecode.jsp = anon
+				/validatecode2.jsp = anon
+				/sysboard_jsp/signup.jsp=anon
+				/company/signUp.action = anon
+
+				<!-- 无权访问页面 -->
+				/refuse.jsp = anon
+				<!-- roles[XX]表示有XX角色才可访问 -->
+
+				<!-- user表示身份认证通过或通过记住我认证通过的可以访问 -->
+				/** = authc
+			</value>
+		</property>
+	</bean>
+
+	<!-- 安全管理器 -->
+	<bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+		<property name="realm" ref="loginRealm" /> 
+		<property name="sessionManager" ref="sessionManager" />
+	</bean>
+
+	<!-- 自定义 realm -->
+	<bean id="loginRealm" class="com.airintelli.ssm.shiro.LoginRealm">
+		<property name="credentialsMatcher" ref="credentialsMatcher" />
+	</bean>
+	<!-- 凭证匹配器 -->
+	<bean id="credentialsMatcher"
+		class="org.apache.shiro.authc.credential.HashedCredentialsMatcher">
+		<property name="hashAlgorithmName" value="md5" />
+		<property name="hashIterations" value="1" />
+	</bean>
+
+	<bean id="formAuthenticationFilter" class="com.airintelli.ssm.shiro.MyFormAuthenticationFilter">
+
+		<!-- class="org.apache.shiro.web.filter.authc.FormAuthenticationFilter"> -->
+
+		<!-- 表单中账号的input名称 -->
+		<property name="usernameParam" value="username1" />
+		<!-- 表单中密码的input名称 -->
+		<property name="passwordParam" value="password1" />
+	</bean>
+	
+	<!-- 会话管理器 -->
+	<bean id="sessionManager" class="org.apache.shiro.web.session.mgt.DefaultWebSessionManager">
+	    <!-- session的失效时长，单位毫秒 -->
+        <property name="globalSessionTimeout" value="600000"/>
+        <!-- 删除失效的session -->
+        <property name="deleteInvalidSessions" value="true"/>
+	</bean>
+	
+	<bean
+		class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
+
+		<property name="customArgumentResolvers">
+			<list>
+				<bean class="com.airintelli.ssm.controller.resolver.DataTableParamsResolver" />
+			</list>
+		</property>
+		<property name="order" value="0" />
+	</bean>
+</beans>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.airintelli.ssm.dao.AnalysisTasksDataRelationVoMapper">
+
+	<resultMap id="BaseResultMap"
+		type="com.airintelli.ssm.pojo.AnalysisTasksDataRelationVo" 
+		extends="com.airintelli.ssm.dao.AnalysisTasksMapper.BaseResultMap">
+		<association property="dataRelationList"
+			javaType="com.airintelli.ssm.pojo.DataRelation">
+			<id column="datar_id" property="id" jdbcType="INTEGER" />
+			<result column="name" property="name" jdbcType="VARCHAR" />
+			<result column="datar_cid" property="cid" jdbcType="INTEGER" />
+			<result column="tid1" property="tid1" jdbcType="INTEGER" />
+			<result column="tid2" property="tid2" jdbcType="INTEGER" />
+			<result column="col1" property="col1" jdbcType="INTEGER" />
+			<result column="col2" property="col2" jdbcType="INTEGER" />
+			<result column="state" property="state" jdbcType="INTEGER" />
+		</association>
+	</resultMap>
+
+	<sql id="Base_Column_analysistasks_List">
+		id, starttime, endtime, cid, did, taskstatus, rule,
+		feedback,arithmeticid 
+	</sql>
+    
+   <!--  //根据企业客户id得到对应的所有数据关系表的分析任务列表 -->
+	<select id="getAnalysisTasksDataRelationVo" resultMap="BaseResultMap"
+		parameterType="com.airintelli.ssm.pojo.PageBean">
+		select datar.id datar_id,datar.name,datar.`cid` datar_cid,
+		datar.`tid1`,datar.`tid2`,
+		datar.`col1`,datar.`col2`,
+		datar.`state`,anal.* from analysistasks anal,datarelation datar
+		where
+		anal.did=datar.id
+		<if test="querycondition != null">
+			<if
+				test="querycondition.firstcondition !=null and querycondition.firstcondition !='' ">
+				and anal.`cid`=#{querycondition.firstcondition}
+			</if>
+		</if>
+		limit #{pageRowes},#{pageSize}
+	</select>
+	
+<!--//根据企业客户id得到对应的所有数据关系表的分析任务列表数据总数  -->
+	<select id="getAnalysisTasksDataRelationVoCount" parameterType="com.airintelli.ssm.pojo.PageBean"
+		resultType="Integer">
+		select count(*) from analysistasks anal,datarelation datar
+		where
+		anal.did=datar.id
+		<if test="querycondition != null">
+			<if
+				test="querycondition.firstcondition !=null and querycondition.firstcondition !='' ">
+				and anal.`cid`=#{querycondition.firstcondition}
+			</if>
+		</if>
+	</select>
+	
+<!-- 添加数据分析任务时，检查关联表、算法、算法规则，是否已经存在 -->
+   <select id="checkAnalysisTasks" resultType="com.airintelli.ssm.pojo.AnalysisTasks" 
+   parameterType="com.airintelli.ssm.pojo.AnalysisTasks">
+       select * from `analysistasks` 
+       where did=#{did} 
+       and arithmeticid=#{arithmeticid} 
+       and rule=#{rule}
+   </select>
+</mapper>

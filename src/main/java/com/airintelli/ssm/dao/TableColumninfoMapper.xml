@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.airintelli.ssm.dao.TableColumninfoMapper" >
+  <resultMap id="BaseResultMap" type="com.airintelli.ssm.pojo.TableColumnInfo" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="tid" property="tid" jdbcType="INTEGER" />
+    <result column="columnName" property="columnName" jdbcType="VARCHAR" />
+    <result column="columnType" property="columnType" jdbcType="VARCHAR" />
+    <result column="physicalColumnName" property="physicalColumnName" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, tid, columnName, columnType,  physicalColumnName
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from tablecolumninfo
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from tablecolumninfo
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.airintelli.ssm.pojo.TableColumnInfo" >
+    insert into tablecolumninfo (id, tid, columnName, 
+      columnType, showtype, physicalColumnName
+      )
+    values (#{id,jdbcType=INTEGER}, #{tid,jdbcType=INTEGER}, #{columnname,jdbcType=VARCHAR}, 
+      #{columntype,jdbcType=VARCHAR}, #{physicalcolumnname,jdbcType=VARCHAR}
+      )
+  </insert>
+   <!-- 查询一张表对应的列名 -->
+ <select id="selectColumnNames" parameterType="java.lang.Integer" resultMap="BaseResultMap"  >
+ 
+  select 
+    <include refid="Base_Column_List" />
+    from tablecolumninfo
+     where tid = #{tid,jdbcType=INTEGER}
+ </select>
+<!--  创建对应的物理表 -->
+<update id="createNewTable" parameterType="com.airintelli.ssm.pojo.Sql">  
+        create table ${tableName}(
+                     ${columnName})                        
+</update>
+ 
+  <insert id="insertSelective" parameterType="com.airintelli.ssm.pojo.TableColumnInfo" >
+    insert into tablecolumninfo
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="tid != null" >
+        tid,
+      </if>
+      <if test="columnName != null" >
+        columnName,
+      </if>
+      <if test="columnType != null" >
+        columnType,
+      </if>
+      
+      <if test="physicalColumnName != null" >
+        physicalColumnName,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="tid != null" >
+        #{tid,jdbcType=INTEGER},
+      </if>
+      <if test="columnName != null" >
+        #{columnName,jdbcType=VARCHAR},
+      </if>
+      <if test="columnType != null" >
+        #{columnType,jdbcType=VARCHAR},
+      </if>
+      <if test="physicalColumnName != null" >
+        #{physicalColumnName,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.airintelli.ssm.pojo.TableColumnInfo" >
+    update tablecolumninfo
+    <set >
+      <if test="tid != null" >
+        tid = #{tid,jdbcType=INTEGER},
+      </if>
+      <if test="columnName != null" >
+        columnName = #{columnName,jdbcType=VARCHAR},
+      </if>
+      <if test="columnType != null" >
+        columnType = #{columnType,jdbcType=VARCHAR},
+      </if>
+      <if test="physicalColumnName != null" >
+        physicalColumnName = #{physicalColumnName,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.airintelli.ssm.pojo.TableColumnInfo" >
+    update tablecolumninfo
+    set tid = #{tid,jdbcType=INTEGER},
+      columnName = #{columnName,jdbcType=VARCHAR},
+      columnType = #{columnType,jdbcType=VARCHAR},
+      physicalColumnName = #{physicalColumnName,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>
